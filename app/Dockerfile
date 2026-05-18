@@ -11,7 +11,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copia el resto del codigo
-COPY ..
+COPY . .
 
 # Puerto por donde corre Flask
 EXPOSE 5000
