@@ -1,0 +1,21 @@
+# Entorno virtual Python
+venv/
+env/
+.env
+
+# Archivos compilados de Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Variables de entorno y secretos (nunca al repo)
+.env
+*.env
+
+# Sistemas operativos
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
