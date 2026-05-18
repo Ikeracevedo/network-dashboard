@@ -16,27 +16,25 @@ def index():
 # Endpoint para verificar si el host responde ping
 @app.route('/api/check')
 def verificador_host():
-    host = request.args.get('host','')
+    host = request.args.get('host', '')
 
     if not host:
-        return jsonify({'error':'Debes enviar un host valido'}), 400
-
-    # El comando entre linux y windows puede variar por eso se usa el metodo para comprobar el SO 
-    param = '-n' if platform.system().lower() == 'windows' else '-c'
-    command = ['ping', param, '1', host]
+        return jsonify({'error': 'Debes enviar un host valido'}), 400
 
     try:
-        output = subprocess.run(command, capture_output=True, timeout=5)
-        alive = output.returncode == 0
-    except Exception as e:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(3)
+        result = sock.connect_ex((host, 80))
+        sock.close()
+        alive = result == 0
+    except Exception:
         alive = False
 
     return jsonify({
         'host': host,
         'alive': alive,
-        'timestamp':datetime.datetime.now().isoformat()
+        'timestamp': datetime.datetime.now().isoformat()
     })
-
 
 # Endpoint para verifiacr si un puerto esta abierto en un host
 
