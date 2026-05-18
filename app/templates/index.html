@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Red</title>
+    <style>
+        /*Configuracion basica y tipografia */
+        *{margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            padding: 2rem;
+        }
+
+        h1 {
+            color: #58a6ff;
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            color: #8b949e;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* Tarjeta de cada una de las herramientas */
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            max-width: 600px;
+        }
+
+        .card h2 {
+            color: #58a6ff;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Inputs y botones */
+        .row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        input {
+            flex: 1;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            padding: 0.5rem 0.75rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        button {
+            background: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        button:hover { background: #2ea043; }
+
+        /* Resultado */
+        .result {
+            font-size: 0.85rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            min-height: 48px;
+            white-space: pre-wrap;
+        }
+
+        .ok   { border-color: #238636; color: #3fb950; }
+        .fail { border-color: #da3633; color: #f85149; }
+    </style>
+</head>
+<body>
+    
+    <h1>⬡ Network Dashboard</h1>
+    <p class="subtitle">Herramienta de monitoreo de red · Proyecto Telemática 2026</p>
+
+    <!-- Tarjeta 1: Ping -->
+    <div class="card">
+        <h2>► Verificar host (ping)</h2>
+        <div class="row">
+            <input type="text" id="pingHost" placeholder="Ej: 8.8.8.8 o google.com" />
+            <button onclick="checkHost()">Verificar</button>
+        </div>
+        <div class="result" id="pingResult">Esperando...</div>
+    </div>
+
+    <!-- Tarjeta 2: Puerto -->
+    <div class="card">
+        <h2>► Verificar puerto</h2>
+        <div class="row">
+            <input type="text" id="portHost" placeholder="Host o IP" />
+            <input type="text" id="portNum"  placeholder="Puerto" style="max-width:100px" />
+            <button onclick="checkPort()">Verificar</button>
+        </div>
+        <div class="result" id="portResult">Esperando...</div>
+    </div>
+
+    <script>
+        // Llama a /api/check con el host ingresado
+        async function checkHost() {
+            const host = document.getElementById('pingHost').value.trim()
+            const resultDiv = document.getElementById('pingResult')
+
+            if (!host) {
+                resultDiv.textContent = 'Ingresa un host válido'
+                resultDiv.className = 'result fail'
+                return
+            }
+
+            resultDiv.textContent = 'Verificando...'
+            resultDiv.className = 'result'
+
+            try {
+                const response = await fetch(`/api/check?host=${host}`)
+                const data = await response.json()
+
+                if (data.alive) {
+                    resultDiv.textContent = `${data.host} está activo\nTimestamp: ${data.timestamp}`
+                    resultDiv.className = 'result ok'
+                } else {
+                    resultDiv.textContent = `${data.host} no responde\nTimestamp: ${data.timestamp}`
+                    resultDiv.className = 'result fail'
+                }
+            } catch (e) {
+                resultDiv.textContent = 'Error conectando con la API'
+                resultDiv.className = 'result fail'
+            }
+        }
+
+        // Llama a /api/port con host y puerto ingresados
+        async function checkPort() {
+            const host = document.getElementById('portHost').value.trim()
+            const port = document.getElementById('portNum').value.trim()
+            const resultDiv = document.getElementById('portResult')
+
+            if (!host || !port) {
+                resultDiv.textContent = 'Ingresa host y puerto'
+                resultDiv.className = 'result fail'
+                return
+            }
+
+            resultDiv.textContent = 'Verificando...'
+            resultDiv.className = 'result'
+
+            try {
+                const response = await fetch(`/api/port?host=${host}&port=${port}`)
+                const data = await response.json()
+
+                if (data.open) {
+                    resultDiv.textContent = `Puerto ${data.port} abierto en ${data.host}\nTimestamp: ${data.timestamp}`
+                    resultDiv.className = 'result ok'
+                } else {
+                    resultDiv.textContent = `Puerto ${data.port} cerrado en ${data.host}\nTimestamp: ${data.timestamp}`
+                    resultDiv.className = 'result fail'
+                }
+            } catch (e) {
+                resultDiv.textContent = 'Error conectando con la API'
+                resultDiv.className = 'result fail'
+            }
+        }
+    </script>
+
+
+</body>
+</html>
