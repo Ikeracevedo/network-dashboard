@@ -9,6 +9,9 @@ services:
     restart: always
     expose:
       - "5000"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
   
   # Contenedor de Nginx como reverse proxy
   nginx:
